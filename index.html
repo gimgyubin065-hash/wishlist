@@ -1,0 +1,1452 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>위시리스트 모으기 💙</title>
+<style>
+:root{
+  --blue:#488af4;
+  --deep:#27599f;
+  --sky:#eaf5ff;
+  --line:#dceafa;
+  --text:#304563;
+  --muted:#7b90aa;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+  background:#f5f9ff;
+  color:var(--text);
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{
+  outline:3px solid #9acbff;
+  outline-offset:2px;
+}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hidden{display:none!important}
+.screen{display:none}
+.screen.active{display:block}
+.wrap{width:min(780px,92%);margin:auto}
+.card{
+  background:white;
+  padding:25px;
+  border-radius:23px;
+  box-shadow:0 8px 28px #5081ba10;
+  margin-bottom:20px;
+}
+h1,h2,h3,p{overflow-wrap:anywhere}
+h2{font-size:21px;margin:0 0 15px}
+h3{font-size:16px}
+.muted{color:var(--muted);font-size:13px}
+.btn{
+  border:0;
+  border-radius:14px;
+  background:var(--blue);
+  color:white;
+  padding:14px 20px;
+  font-weight:700;
+  transition:transform .2s;
+}
+.btn:active{transform:scale(.96)}
+.light{background:var(--sky);color:var(--deep)}
+.danger{background:#fff0f2;color:#d34e71}
+.full{width:100%}
+.small{padding:9px 12px;font-size:13px}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin:17px 0 8px;
+}
+input{
+  width:100%;
+  border:1px solid var(--line);
+  background:#fbfdff;
+  border-radius:13px;
+  padding:14px;
+  outline:none;
+}
+input:focus{border-color:var(--blue)}
+.row{display:flex;gap:10px;align-items:center}
+.row input{min-width:0;flex:1}
+
+/* 홈 화면 */
+#home{
+  min-height:100vh;
+  background:linear-gradient(155deg,#dff1ff,#fff 65%);
+}
+.home-content{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  text-align:center;
+  padding:28px;
+}
+.home-icon{
+  font-size:88px;
+  margin-bottom:14px;
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-12px)}
+}
+.home-content h1{
+  color:var(--deep);
+  font-size:clamp(30px,6vw,43px);
+  margin:5px 0;
+}
+.home-content p{
+  line-height:1.9;
+  color:#7288a5;
+}
+.home-content .btn{
+  width:min(290px,100%);
+  margin-top:24px;
+  font-size:17px;
+}
+.home-features{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:36px;
+}
+.home-features span{
+  background:white;
+  padding:12px 16px;
+  border-radius:30px;
+  color:var(--deep);
+  font-size:12px;
+}
+
+/* 메인 상단 */
+.topbar{
+  background:white;
+  padding:15px 0;
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.logo{font-weight:800;color:var(--deep)}
+main{padding:25px 0 50px}
+.summary{text-align:center}
+.summary .amount{
+  color:var(--blue);
+  font-size:clamp(34px,6vw,45px);
+  font-weight:900;
+  margin:12px 0;
+}
+.goal-select{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:15px 0;
+}
+.chip{
+  border:1px solid var(--line);
+  background:var(--sky);
+  color:var(--deep);
+  border-radius:25px;
+  padding:9px 13px;
+  font-size:12px;
+}
+.chip.selected{background:var(--blue);color:white}
+.empty{
+  padding:30px 15px;
+  text-align:center;
+  color:var(--muted);
+  background:#f6fbff;
+  border-radius:15px;
+  line-height:1.8;
+}
+
+/* 퍼즐 */
+.puzzle-area{
+  max-width:390px;
+  margin:20px auto;
+  position:relative;
+}
+.puzzle{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(4,1fr);
+  aspect-ratio:1/1;
+  gap:3px;
+  background:#c8e5ff;
+  padding:4px;
+  border-radius:20px;
+  overflow:visible;
+}
+.piece{
+  position:relative;
+  border-radius:4px;
+  background-color:#bfe0ff;
+  background-repeat:no-repeat;
+  overflow:visible;
+  transform:scale(1);
+}
+.piece::after{
+  content:"✦";
+  position:absolute;
+  inset:0;
+  background:#e0efff;
+  color:#9ac4f6;
+  display:grid;
+  place-items:center;
+  border-radius:4px;
+  font-size:20px;
+  opacity:1;
+  transition:opacity .48s,transform .48s;
+}
+.piece.open::after{
+  opacity:0;
+  transform:scale(1.5) rotate(12deg);
+  pointer-events:none;
+}
+.piece.reveal{
+  z-index:2;
+  animation:piecePop .65s cubic-bezier(.2,1.6,.4,1);
+}
+@keyframes piecePop{
+  0%{transform:scale(.65);filter:brightness(2)}
+  45%{
+    transform:scale(1.23);
+    filter:brightness(1.45);
+    box-shadow:0 0 25px #65c5ff;
+  }
+  100%{transform:scale(1);filter:brightness(1)}
+}
+.sparkle{
+  position:absolute;
+  top:50%;
+  left:50%;
+  font-size:25px;
+  color:#40baff;
+  pointer-events:none;
+  z-index:6;
+  animation:spark .85s ease-out forwards;
+}
+@keyframes spark{
+  0%{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(.3) rotate(0);
+  }
+  100%{
+    opacity:0;
+    transform:translate(
+      calc(-50% + var(--dx)),
+      calc(-50% + var(--dy))
+    ) scale(1.5) rotate(150deg);
+  }
+}
+.progress{
+  height:14px;
+  border-radius:20px;
+  background:#e6f0fb;
+  overflow:hidden;
+  margin:12px 0;
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,#4385f5,#78d2ff);
+  transition:width .6s;
+}
+.progress-text{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  gap:10px;
+}
+.progress-text strong{color:var(--blue)}
+.goal-name{
+  font-weight:800;
+  font-size:20px;
+  text-align:center;
+  margin-top:18px;
+}
+
+/* 기록 입력 */
+.reason-box{position:relative}
+.suggestions{
+  position:absolute;
+  left:0;
+  right:0;
+  top:100%;
+  z-index:8;
+  background:white;
+  border:1px solid var(--line);
+  border-radius:12px;
+  max-height:185px;
+  overflow:auto;
+  box-shadow:0 7px 18px #32649c20;
+}
+.suggestions button{
+  display:block;
+  width:100%;
+  text-align:left;
+  padding:12px;
+  border:0;
+  background:white;
+}
+.suggestions button:hover{background:var(--sky)}
+.quick-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:12px 0;
+}
+.add-row{margin:15px 0}
+
+/* 타임라인 */
+details{margin-top:15px}
+summary{
+  cursor:pointer;
+  font-weight:700;
+  color:var(--deep);
+  padding:10px;
+}
+.feed-item{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:15px;
+  border-bottom:1px solid var(--line);
+}
+.feed-item strong{font-size:14px}
+.feed-item p{margin:6px 0;color:var(--blue)}
+.feed-item small{color:var(--muted)}
+.feed-item button{
+  border:0;
+  background:transparent;
+  color:#d35b70;
+  font-size:12px;
+}
+
+/* 등록 및 인증서 화면 */
+.sub-header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+.emoji-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.emoji-btn{
+  border:2px solid transparent;
+  padding:12px;
+  font-size:28px;
+  border-radius:14px;
+  background:var(--sky);
+}
+.emoji-btn.selected{border-color:var(--blue)}
+#preview{
+  max-height:170px;
+  max-width:100%;
+  object-fit:contain;
+  margin-top:12px;
+  border-radius:10px;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:#234366a8;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+.modal-content{
+  background:white;
+  border-radius:22px;
+  padding:22px;
+  width:min(450px,100%);
+  text-align:center;
+  max-height:94vh;
+  overflow:auto;
+}
+.certificate{
+  border:5px double #87b9ff;
+  background:linear-gradient(145deg,#fff,#e9f5ff);
+  border-radius:15px;
+  padding:35px 12px;
+  margin-bottom:15px;
+}
+.certificate .medal{font-size:70px}
+.certificate h2{color:var(--deep);line-height:1.5}
+.certificate strong{color:var(--blue)}
+.certificate p{line-height:1.8}
+.toast{
+  position:fixed;
+  z-index:50;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#285680;
+  color:white;
+  padding:13px 18px;
+  border-radius:30px;
+  font-size:13px;
+  text-align:center;
+  max-width:90%;
+}
+@media(max-width:550px){
+  .card{padding:19px}
+  .topbar .logo{font-size:14px}
+  .home-icon{font-size:65px}
+  .home-features{gap:6px}
+  .home-features span{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    transition-duration:.01ms!important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 1. 홈 화면 -->
+<section id="home" class="screen active">
+  <div class="home-content">
+    <div class="home-icon">🎁</div>
+    <h1>위시리스트 모으기</h1>
+    <p>
+      사고 싶은 물건이 있나요?<br>
+      오늘 참은 작은 소비가<br>
+      내일의 큰 선물이 될 거예요 💙
+    </p>
+    <button class="btn" id="startBtn">저축 시작하기 →</button>
+    <div class="home-features">
+      <span>🧩 퍼즐 모으기</span>
+      <span>💰 소비 참기</span>
+      <span>🏆 목표 달성</span>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 메인 화면 -->
+<section id="mainScreen" class="screen">
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <span class="logo">💙 위시리스트 모으기</span>
+      <button class="btn light small" id="homeBtn">⌂ 홈</button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card summary">
+      <p class="muted">내가 차곡차곡 모은 돈</p>
+      <div class="amount" id="balance">0원</div>
+      <p class="muted" id="summaryText">
+        오늘도 작은 절약에 도전해 보세요!
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>🧩 나의 꿈 퍼즐</h2>
+      <div class="goal-select" id="goalList"></div>
+
+      <div id="emptyGoal" class="empty">
+        아직 목표가 없어요! 🎁<br>
+        갖고 싶은 물건을 등록해 보세요.
+      </div>
+
+      <div id="puzzleSection" class="hidden">
+        <div class="puzzle-area">
+          <div class="puzzle" id="puzzle"></div>
+        </div>
+
+        <div class="goal-name" id="goalNameDisplay"></div>
+
+        <div class="progress-text">
+          <span id="goalMoney"></span>
+          <strong id="goalPercent"></strong>
+        </div>
+
+        <div class="progress">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <p class="muted" id="pieceCount"></p>
+
+        <div class="row" style="flex-wrap:wrap">
+          <button class="btn light small" id="soundBtn">
+            🔊 효과음 켜짐
+          </button>
+          <button class="btn light small hidden" id="certBtn">
+            🏆 인증서 보기
+          </button>
+          <button class="btn danger small" id="deleteGoalBtn">
+            목표 삭제
+          </button>
+        </div>
+      </div>
+
+      <button class="btn light full" id="newGoalBtn"
+              style="margin-top:18px">
+        + 새로운 위시리스트 등록
+      </button>
+    </section>
+
+    <section class="card">
+      <h2>🌱 오늘의 소비 참기</h2>
+      <p class="muted">
+        소비를 참은 만큼 저축액을 늘려 보세요.
+      </p>
+
+      <label for="saveAmount">얼마를 아꼈나요?</label>
+      <input id="saveAmount" type="number"
+             min="1" step="1" placeholder="예: 5000">
+
+      <div class="quick-list" id="amountQuick">
+        <button class="chip" data-value="1000">1,000원</button>
+        <button class="chip" data-value="3000">3,000원</button>
+        <button class="chip" data-value="5000">5,000원</button>
+        <button class="chip" data-value="10000">10,000원</button>
+      </div>
+
+      <label for="saveReason">왜 아꼈나요?</label>
+      <div class="reason-box">
+        <input id="saveReason" type="text" maxlength="80"
+               autocomplete="off"
+               placeholder="클릭해서 선택하거나 직접 입력">
+        <div id="suggestions" class="suggestions hidden"></div>
+      </div>
+
+      <div class="quick-list" id="quickReasons"></div>
+
+      <div class="row add-row">
+        <input id="newReason" type="text" maxlength="80"
+               placeholder="나만의 절약 이유 추가">
+        <button class="btn light small" id="addReasonBtn">
+          추가
+        </button>
+      </div>
+
+      <button class="btn full" id="saveBtn">
+        💙 절약 기록하고 퍼즐 열기!
+      </button>
+    </section>
+
+    <section class="card">
+      <h2>📅 나의 절약 기록</h2>
+      <p class="muted" id="recordSummary"></p>
+
+      <details id="historyDetails">
+        <summary>절약 타임라인 펼쳐보기</summary>
+        <div id="feed"></div>
+      </details>
+    </section>
+  </main>
+</section>
+
+<!-- 3. 목표 등록 화면 -->
+<section id="goalScreen" class="screen">
+  <main class="wrap" style="padding-top:30px">
+    <div class="sub-header">
+      <button class="btn light small" id="backBtn">← 뒤로</button>
+      <h2 style="margin:0">새로운 꿈 등록하기 🎁</h2>
+    </div>
+
+    <div class="card">
+      <label for="newGoalName">갖고 싶은 물건</label>
+      <input id="newGoalName" maxlength="40"
+             placeholder="예: 아이패드">
+
+      <label for="newGoalPrice">목표 금액 (원)</label>
+      <input id="newGoalPrice" type="number"
+             min="1" step="1" placeholder="예: 500000">
+
+      <label>그림 선택</label>
+      <div class="emoji-list" id="emojiList">
+        <button class="emoji-btn selected" data-emoji="📱">📱</button>
+        <button class="emoji-btn" data-emoji="💻">💻</button>
+        <button class="emoji-btn" data-emoji="🎧">🎧</button>
+        <button class="emoji-btn" data-emoji="👟">👟</button>
+        <button class="emoji-btn" data-emoji="🎮">🎮</button>
+        <button class="emoji-btn" data-emoji="🎁">🎁</button>
+      </div>
+
+      <label for="photoInput">실제 물건 사진 (선택)</label>
+      <input id="photoInput" type="file" accept="image/*">
+      <img id="preview" alt="선택한 물건 사진" class="hidden">
+
+      <p class="muted">
+        사진을 등록하면 저축할 때마다 사진이 조금씩 공개돼요.
+      </p>
+
+      <button class="btn full" id="registerBtn"
+              style="margin-top:15px">
+        목표 등록 완료 💙
+      </button>
+    </div>
+  </main>
+</section>
+
+<!-- 4. 인증서 -->
+<div id="certModal" class="modal hidden"
+     role="dialog" aria-modal="true"
+     aria-label="목표 달성 인증서">
+  <div class="modal-content">
+    <div class="certificate">
+      <div class="medal">🏆</div>
+      <h2>충동 소비 참기<br>마스터 인증서</h2>
+      <p>축하합니다! 🎉</p>
+      <p>
+        충동 소비의 유혹을 이겨내고<br>
+        <strong id="certGoal"></strong><br>
+        목표를 달성했습니다!
+      </p>
+      <strong id="certMoney"></strong>
+      <p class="muted" id="certDate"></p>
+      <p>꾸준함으로 완성한 나의 꿈 💙</p>
+    </div>
+    <button class="btn full" id="downloadBtn">
+      📥 인증서 이미지 저장
+    </button>
+    <button class="btn light full" id="shareBtn"
+            style="margin-top:9px">
+      💌 친구에게 공유
+    </button>
+    <button class="btn light full" id="closeCertBtn"
+            style="margin-top:9px">
+      닫기
+    </button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden" role="status"
+     aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* 데이터 관리 */
+
+const KEY = "wishlist-saving-simple-v2";
+
+const DEFAULT_REASONS = [
+  "택시 대신 버스 타기 🚌",
+  "커피 사지 않기 ☕",
+  "편의점 간식 참기 🍪",
+  "배달음식 참기 🍔",
+  "충동 쇼핑 참기 🛍️"
+];
+
+const $ = id => document.getElementById(id);
+
+const saved = (() => {
+  try {
+    return JSON.parse(localStorage.getItem(KEY)) || {};
+  } catch {
+    return {};
+  }
+})();
+
+let data = {
+  balance: Number.isSafeInteger(saved.balance) &&
+           saved.balance >= 0 ? saved.balance : 0,
+  goals: Array.isArray(saved.goals) ? saved.goals : [],
+  records: Array.isArray(saved.records) ? saved.records : [],
+  reasons: Array.isArray(saved.reasons)
+    ? saved.reasons : [...DEFAULT_REASONS],
+  selected: saved.selected || null,
+  notified: Array.isArray(saved.notified) ? saved.notified : [],
+  sound: saved.sound !== false
+};
+
+let selectedEmoji = "📱";
+let photoData = null;
+let currentCertGoal = null;
+let audioCtx = null;
+let animationTimers = [];
+let toastTimer;
+
+function store() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    return true;
+  } catch {
+    notify("저장 공간이 부족해요. 사진을 줄여 주세요.");
+    return false;
+  }
+}
+
+function won(n) {
+  return Math.floor(n).toLocaleString("ko-KR") + "원";
+}
+
+function getNumber(value, allowZero = false) {
+  if (String(value).trim() === "") return null;
+  const n = Number(value);
+  return Number.isSafeInteger(n) &&
+    n >= (allowZero ? 0 : 1) ? n : null;
+}
+
+function uid() {
+  return window.crypto?.randomUUID?.() ||
+    Date.now() + "-" + Math.random().toString(36).slice(2);
+}
+
+function notify(text) {
+  $("toast").textContent = text;
+  $("toast").classList.remove("hidden");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    $("toast").classList.add("hidden");
+  }, 3000);
+}
+
+function showScreen(id) {
+  clearAnimations();
+  document.querySelectorAll(".screen").forEach(el => {
+    el.classList.toggle("active", el.id === id);
+  });
+  window.scrollTo(0, 0);
+}
+
+function goal() {
+  return data.goals.find(g => g.id === data.selected) || null;
+}
+
+function percent(g) {
+  return g ? Math.min(100, data.balance / g.price * 100) : 0;
+}
+
+function openedCount(g) {
+  return Math.min(20, Math.floor(percent(g) / 5 + 1e-9));
+}
+
+/* 화면 이동 */
+
+$("startBtn").onclick = () => showScreen("mainScreen");
+$("homeBtn").onclick = () => showScreen("home");
+$("newGoalBtn").onclick = () => showScreen("goalScreen");
+$("backBtn").onclick = () => showScreen("mainScreen");
+
+/* 이미지 */
+
+function emojiImage(emoji) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 600;
+  const x = c.getContext("2d");
+
+  const grad = x.createLinearGradient(0, 0, 600, 600);
+  grad.addColorStop(0, "#dff2ff");
+  grad.addColorStop(1, "#74b7ff");
+
+  x.fillStyle = grad;
+  x.fillRect(0, 0, 600, 600);
+
+  x.fillStyle = "#ffffff88";
+  x.beginPath();
+  x.arc(300, 300, 230, 0, Math.PI * 2);
+  x.fill();
+
+  x.textAlign = "center";
+  x.textBaseline = "middle";
+  x.font = '280px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+  x.fillText(emoji, 300, 300);
+
+  return c.toDataURL("image/png");
+}
+
+function processPhoto(file) {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith("image/")) {
+      reject(new Error("이미지 파일을 선택해 주세요."));
+      return;
+    }
+
+    const image = new Image();
+    const url = URL.createObjectURL(file);
+
+    image.onload = () => {
+      try {
+        const c = document.createElement("canvas");
+        c.width = c.height = 600;
+        const x = c.getContext("2d");
+
+        const scale = Math.max(
+          600 / image.width, 600 / image.height
+        );
+        const w = image.width * scale;
+        const h = image.height * scale;
+
+        x.drawImage(image,(600-w)/2,(600-h)/2,w,h);
+        resolve(c.toDataURL("image/jpeg", .78));
+      } catch(e) {
+        reject(e);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("사진을 읽을 수 없어요."));
+    };
+
+    image.src = url;
+  });
+}
+
+$("photoInput").onchange = async e => {
+  const file = e.target.files[0];
+  photoData = null;
+  $("preview").classList.add("hidden");
+
+  if (!file) return;
+
+  try {
+    photoData = await processPhoto(file);
+    $("preview").src = photoData;
+    $("preview").classList.remove("hidden");
+  } catch(e) {
+    notify(e.message);
+    e.target.value = "";
+  }
+};
+
+document.querySelectorAll(".emoji-btn").forEach(btn => {
+  btn.onclick = () => {
+    selectedEmoji = btn.dataset.emoji;
+    document.querySelectorAll(".emoji-btn").forEach(b => {
+      b.classList.toggle("selected", b === btn);
+    });
+  };
+});
+
+/* 목표 등록 */
+
+$("registerBtn").onclick = () => {
+  const name = $("newGoalName").value.trim();
+  const price = getNumber($("newGoalPrice").value);
+
+  if (!name) return notify("물건 이름을 입력해 주세요.");
+  if (price === null) {
+    return notify("목표 금액을 올바르게 입력해 주세요.");
+  }
+
+  const g = {
+    id: uid(),
+    name,
+    price,
+    image: photoData || emojiImage(selectedEmoji)
+  };
+
+  data.goals.push(g);
+  data.selected = g.id;
+
+  if (!store()) {
+    data.goals.pop();
+    data.selected = data.goals[0]?.id || null;
+    return;
+  }
+
+  $("newGoalName").value = "";
+  $("newGoalPrice").value = "";
+  $("photoInput").value = "";
+  $("preview").classList.add("hidden");
+  photoData = null;
+
+  render();
+  showScreen("mainScreen");
+  notify("새로운 꿈이 등록됐어요! 🎁");
+  checkAchievements();
+};
+
+/* 퍼즐 */
+
+const REVEAL_ORDER = [
+  12,7,13,6,8,17,11,2,18,3,
+  1,16,14,9,4,0,5,10,15,19
+];
+
+function clearAnimations() {
+  animationTimers.forEach(clearTimeout);
+  animationTimers = [];
+}
+
+function renderPuzzle(g, revealFrom = null) {
+  const box = $("puzzle");
+  box.replaceChildren();
+
+  const count = openedCount(g);
+  const oldCount = revealFrom === null
+    ? count : Math.min(revealFrom, count);
+
+  const oldPositions = new Set(
+    REVEAL_ORDER.slice(0, oldCount)
+  );
+
+  for (let i = 0; i < 20; i++) {
+    const piece = document.createElement("div");
+    piece.className = "piece";
+    piece.dataset.index = i;
+
+    const col = i % 5;
+    const row = Math.floor(i / 5);
+
+    piece.style.backgroundImage = `url("${g.image}")`;
+    piece.style.backgroundSize = "500% 400%";
+    piece.style.backgroundPosition =
+      `${col * 25}% ${row * 100 / 3}%`;
+
+    if (oldPositions.has(i)) {
+      piece.classList.add("open");
+    }
+    box.appendChild(piece);
+  }
+
+  // 이전 퍼즐 상태에서 새로 공개된 조각만 연출
+  if (revealFrom !== null && count > oldCount) {
+    for (let n = oldCount; n < count; n++) {
+      const pieceIndex = REVEAL_ORDER[n];
+
+      const timer = setTimeout(() => {
+        const piece = box.querySelector(
+          `[data-index="${pieceIndex}"]`
+        );
+
+        if (!piece) return;
+        piece.classList.add("reveal");
+        piece.classList.add("open");
+        createSparkles(piece);
+        playSound();
+
+        const cleanup = setTimeout(() => {
+          piece.classList.remove("reveal");
+        }, 700);
+
+        animationTimers.push(cleanup);
+      }, 180 + (n - oldCount) * 300);
+
+      animationTimers.push(timer);
+    }
+  }
+}
+
+function createSparkles(piece) {
+  const offsets = [
+    [-42,-45],[40,-40],[-50,20],
+    [45,35],[0,-55],[0,50]
+  ];
+
+  offsets.forEach(([dx,dy],i) => {
+    const spark = document.createElement("span");
+    spark.className = "sparkle";
+    spark.textContent = i % 2 ? "✦" : "✧";
+    spark.style.setProperty("--dx", dx + "px");
+    spark.style.setProperty("--dy", dy + "px");
+    piece.appendChild(spark);
+
+    setTimeout(() => spark.remove(), 900);
+  });
+}
+
+/* 효과음 */
+
+function playSound() {
+  if (!data.sound) return;
+
+  try {
+    const AC = window.AudioContext ||
+               window.webkitAudioContext;
+    if (!AC) return;
+
+    if (!audioCtx) audioCtx = new AC();
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+
+    const t = audioCtx.currentTime;
+    const oscillator = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    oscillator.type = "triangle";
+    oscillator.frequency.setValueAtTime(500,t);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      180,t+.1
+    );
+
+    gain.gain.setValueAtTime(.0001,t);
+    gain.gain.exponentialRampToValueAtTime(.22,t+.006);
+    gain.gain.exponentialRampToValueAtTime(.0001,t+.12);
+
+    oscillator.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    oscillator.start(t);
+    oscillator.stop(t+.13);
+  } catch(e) {
+    console.warn(e);
+  }
+}
+
+$("soundBtn").onclick = () => {
+  data.sound = !data.sound;
+  store();
+  render();
+  if (data.sound) playSound();
+};
+
+/* 절약 이유 */
+
+const reasonInput = $("saveReason");
+
+function renderReasonButtons() {
+  $("quickReasons").replaceChildren();
+
+  data.reasons.slice(0,5).forEach(reason => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.textContent = reason;
+    btn.onclick = () => {
+      reasonInput.value = reason;
+      $("suggestions").classList.add("hidden");
+    };
+    $("quickReasons").appendChild(btn);
+  });
+}
+
+function showSuggestions() {
+  const value = reasonInput.value.toLowerCase();
+  const list = $("suggestions");
+  list.replaceChildren();
+
+  data.reasons
+    .filter(reason => reason.toLowerCase().includes(value))
+    .forEach(reason => {
+      const btn = document.createElement("button");
+      btn.textContent = reason;
+      btn.onclick = () => {
+        reasonInput.value = reason;
+        list.classList.add("hidden");
+      };
+      list.appendChild(btn);
+    });
+
+  list.classList.toggle("hidden", !list.children.length);
+}
+
+reasonInput.onfocus = showSuggestions;
+reasonInput.oninput = showSuggestions;
+
+document.addEventListener("click", e => {
+  if (!e.target.closest(".reason-box")) {
+    $("suggestions").classList.add("hidden");
+  }
+});
+
+$("addReasonBtn").onclick = () => {
+  const value = $("newReason").value.trim();
+  if (!value) return notify("추가할 이유를 입력해 주세요.");
+  if (data.reasons.includes(value)) {
+    return notify("이미 있는 이유예요.");
+  }
+
+  data.reasons.unshift(value);
+  $("newReason").value = "";
+  reasonInput.value = value;
+  store();
+  renderReasonButtons();
+  notify("새로운 절약 이유를 추가했어요!");
+};
+
+document.querySelectorAll("[data-value]").forEach(btn => {
+  btn.onclick = () => {
+    $("saveAmount").value = btn.dataset.value;
+  };
+});
+
+/* 절약 추가 */
+
+$("saveBtn").onclick = () => {
+  const amount = getNumber($("saveAmount").value);
+  const reason = reasonInput.value.trim();
+
+  if (amount === null) {
+    return notify("아낀 금액을 올바르게 입력해 주세요.");
+  }
+  if (!reason) {
+    return notify("절약한 이유를 입력해 주세요.");
+  }
+  if (!Number.isSafeInteger(data.balance + amount)) {
+    return notify("금액이 너무 커요.");
+  }
+
+  const g = goal();
+  const oldCount = g ? openedCount(g) : 0;
+
+  data.balance += amount;
+  data.records.unshift({
+    id:uid(),
+    amount,
+    reason,
+    date:new Date().toISOString()
+  });
+
+  if (!data.reasons.includes(reason)) {
+    data.reasons.unshift(reason);
+  }
+
+  store();
+  $("saveAmount").value = "";
+  reasonInput.value = "";
+
+  render(g ? oldCount : null);
+
+  if (g && openedCount(g) > oldCount) {
+    notify("🎉 퍼즐 조각이 열렸어요!");
+  } else {
+    notify("💙 절약 성공! 한 걸음 더 가까워졌어요.");
+  }
+
+  // 퍼즐 공개 애니메이션을 감상한 후 인증서 표시
+  const added = g ? openedCount(g) - oldCount : 0;
+  const delay = added > 0 ? 400 + added * 300 : 200;
+  setTimeout(checkAchievements, delay);
+};
+
+/* 기록 관리 */
+
+function renderFeed() {
+  $("feed").replaceChildren();
+
+  const sum = data.records.reduce(
+    (total,r) => total + r.amount,0
+  );
+
+  $("recordSummary").textContent =
+    `${data.records.length}번 절약해서 ` +
+    `${won(sum)}을 기록했어요!`;
+
+  if (!data.records.length) {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = "아직 절약 기록이 없어요.";
+    $("feed").appendChild(p);
+    return;
+  }
+
+  data.records.forEach(r => {
+    const item = document.createElement("div");
+    item.className = "feed-item";
+
+    const left = document.createElement("div");
+    const title = document.createElement("strong");
+    const amount = document.createElement("p");
+    const date = document.createElement("small");
+
+    title.textContent = r.reason;
+    amount.textContent = "+ " + won(r.amount);
+    date.textContent = new Date(r.date)
+      .toLocaleString("ko-KR");
+
+    left.append(title,amount,date);
+
+    const del = document.createElement("button");
+    del.textContent = "삭제";
+
+    del.onclick = () => {
+      if (!confirm("이 기록을 삭제할까요?")) return;
+      if (data.balance < r.amount) {
+        notify("잔액보다 큰 기록은 차감할 수 없어요.");
+        return;
+      }
+
+      data.balance -= r.amount;
+      data.records = data.records.filter(x => x.id !== r.id);
+      store();
+      render();
+      checkAchievements();
+    };
+
+    item.append(left,del);
+    $("feed").appendChild(item);
+  });
+}
+
+/* 목표 삭제 */
+
+$("deleteGoalBtn").onclick = () => {
+  const g = goal();
+  if (!g) return;
+  if (!confirm(`"${g.name}" 목표를 삭제할까요?`)) return;
+
+  data.goals = data.goals.filter(x => x.id !== g.id);
+  data.notified = data.notified.filter(id => id !== g.id);
+  data.selected = data.goals[0]?.id || null;
+
+  store();
+  render();
+};
+
+/* 인증서 */
+
+function checkAchievements() {
+  const g = goal();
+  if (!g) return;
+
+  const reached = percent(g) >= 100;
+  const notified = data.notified.includes(g.id);
+
+  if (!reached) {
+    if (notified) {
+      data.notified = data.notified.filter(id => id !== g.id);
+      store();
+    }
+    return;
+  }
+
+  if (!notified) {
+    data.notified.push(g.id);
+    store();
+    showCertificate(g);
+  }
+}
+
+function showCertificate(g) {
+  currentCertGoal = g;
+  $("certGoal").textContent = g.name;
+  $("certMoney").textContent = "목표 금액 " + won(g.price);
+  $("certDate").textContent =
+    new Date().toLocaleDateString("ko-KR");
+  $("certModal").classList.remove("hidden");
+}
+
+function closeCertificate() {
+  $("certModal").classList.add("hidden");
+}
+
+$("certBtn").onclick = () => {
+  const g = goal();
+  if (g && percent(g) >= 100) showCertificate(g);
+};
+
+$("closeCertBtn").onclick = closeCertificate;
+
+$("certModal").onclick = e => {
+  if (e.target === $("certModal")) closeCertificate();
+};
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeCertificate();
+});
+
+function makeCertImage() {
+  if (!currentCertGoal) return null;
+
+  const c = document.createElement("canvas");
+  c.width = 1000;
+  c.height = 1200;
+
+  const x = c.getContext("2d");
+  const grad = x.createLinearGradient(0,0,1000,1200);
+  grad.addColorStop(0,"#fff");
+  grad.addColorStop(1,"#dceeff");
+
+  x.fillStyle = grad;
+  x.fillRect(0,0,1000,1200);
+
+  x.strokeStyle = "#78b8ff";
+  x.lineWidth = 12;
+  x.strokeRect(45,45,910,1110);
+
+  x.textAlign = "center";
+  x.textBaseline = "middle";
+
+  x.fillStyle = "#488af4";
+  x.font = '110px "Segoe UI Emoji",sans-serif';
+  x.fillText("🏆",500,250);
+
+  x.fillStyle = "#2457a0";
+  x.font = "bold 65px sans-serif";
+  x.fillText("충동 소비 참기",500,420);
+  x.fillText("마스터 인증서",500,510);
+
+  x.font = "32px sans-serif";
+  x.fillText("충동 소비를 이겨내고 목표를 달성했어요!",500,650);
+
+  x.fillStyle = "#4385f5";
+  x.font = "bold 39px sans-serif";
+
+  // 긴 목표 이름은 자동으로 줄바꿈
+  const chars = [...currentCertGoal.name];
+  let lines = [], line = "";
+
+  for (const ch of chars) {
+    if (x.measureText(line + ch).width > 800 && line) {
+      lines.push(line);
+      line = ch;
+    } else {
+      line += ch;
+    }
+  }
+  if (line) lines.push(line);
+
+  lines.slice(0,3).forEach((s,i) => {
+    x.fillText(s,500,755+i*53);
+  });
+
+  x.fillStyle = "#2457a0";
+  x.font = "bold 36px sans-serif";
+  x.fillText("목표 금액 " + won(currentCertGoal.price),
+    500,1010);
+
+  x.font = "25px sans-serif";
+  x.fillText(new Date().toLocaleDateString("ko-KR"),
+    500,1090);
+
+  return c;
+}
+
+function certificateBlob() {
+  const c = makeCertImage();
+  if (!c) return Promise.resolve(null);
+
+  return new Promise(resolve => {
+    c.toBlob(resolve,"image/png");
+  });
+}
+
+$("downloadBtn").onclick = async () => {
+  const blob = await certificateBlob();
+  if (!blob) return notify("인증서를 만들 수 없어요.");
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "충동소비참기_마스터인증서.png";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url),3000);
+};
+
+$("shareBtn").onclick = async () => {
+  if (!currentCertGoal) return;
+
+  const text = `🏆 충동 소비 참기 마스터!\n` +
+    `${currentCertGoal.name} 목표 달성 💙`;
+
+  try {
+    const blob = await certificateBlob();
+    if (!blob) throw new Error("이미지 생성 실패");
+
+    const file = new File([blob],"certificate.png",{
+      type:"image/png"
+    });
+
+    if (navigator.share && navigator.canShare?.({
+      files:[file]
+    })) {
+      await navigator.share({text,files:[file]});
+    } else if (navigator.share) {
+      await navigator.share({text});
+    } else if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      notify("공유 문구를 복사했어요!");
+    } else {
+      notify("이미지 저장 버튼으로 저장한 뒤 공유해 주세요.");
+    }
+  } catch(e) {
+    if (e.name !== "AbortError") {
+      notify("공유하지 못했어요. 이미지로 저장해 주세요.");
+    }
+  }
+};
+
+/* 전체 렌더링 */
+
+function render(revealFrom = null) {
+  clearAnimations();
+
+  $("balance").textContent = won(data.balance);
+
+  $("summaryText").textContent = data.records.length
+    ? `지금까지 ${data.records.length}번의 절약에 성공했어요! ✨`
+    : "오늘도 작은 절약에 도전해 보세요!";
+
+  $("goalList").replaceChildren();
+
+  data.goals.forEach(g => {
+    const btn = document.createElement("button");
+    btn.className = "chip" +
+      (g.id === data.selected ? " selected" : "");
+    btn.textContent = g.name;
+
+    btn.onclick = () => {
+      data.selected = g.id;
+      store();
+      render();
+      checkAchievements();
+    };
+
+    $("goalList").appendChild(btn);
+  });
+
+  const g = goal();
+
+  $("emptyGoal").classList.toggle("hidden",!!g);
+  $("puzzleSection").classList.toggle("hidden",!g);
+
+  if (g) {
+    $("goalNameDisplay").textContent = g.name;
+    $("goalMoney").textContent =
+      won(data.balance) + " / " + won(g.price);
+    $("goalPercent").textContent = percent(g).toFixed(1)+"%";
+    $("progressFill").style.width = percent(g)+"%";
+
+    const opened = openedCount(g);
+    $("pieceCount").textContent =
+      opened >= 20
+        ? "🎉 모든 퍼즐을 완성했어요!"
+        : `20조각 중 ${opened}조각 완성! ` +
+          `앞으로 ${won(Math.max(0,g.price-data.balance))} 남았어요.`;
+
+    $("certBtn").classList.toggle(
+      "hidden",percent(g)<100
+    );
+
+    renderPuzzle(g,revealFrom);
+  }
+
+  $("soundBtn").textContent =
+    data.sound ? "🔊 효과음 켜짐" : "🔇 효과음 꺼짐";
+
+  renderReasonButtons();
+  renderFeed();
+}
+
+/* 시작 */
+
+if (!data.goals.some(g => g.id === data.selected)) {
+  data.selected = data.goals[0]?.id || null;
+}
+
+render();
+</script>
+</body>
+</html>
